@@ -1,0 +1,5 @@
+{
+    "name": "pagination",
+    "main": "./Pagination.js",
+    "version": "0.0.1"
+}
