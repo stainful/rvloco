@@ -1,12 +1,16 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
-import { Button, Dialog, Classes } from '@blueprintjs/core';
-import { Column, Table, EditableCell, Cell } from '@blueprintjs/table';
+import { Button } from '@blueprintjs/core';
+import { Column, Table, EditableCell, Cell, TableLoadingOption } from '@blueprintjs/table';
+import ConfirmDialog from '../ConfirmDialog';
 import Filter from '../Filter';
 import Pagination from '../Pagination';
-import rawData from './data';
 
 const compare = (str, value) => str && str.toLowerCase().includes(value);
+
+const getNumRows = (data, pageSize) => (data.length > pageSize ? pageSize : data.length);
+
+const getColumnWidth = wrapper => (wrapper ? (wrapper.clientWidth - 50) / 3 : 0);
 
 const getFiltereData = (data, value) =>
     value
@@ -25,37 +29,53 @@ const getDataSlice = (data, currentPage, pageSize) => {
     return data.slice(start, end);
 };
 
-const ListWrapper = styled.div`
-    padding: 20px;
-`;
-
 const PaginationWrapper = styled.div`
     display: flex;
     justify-content: flex-end;
 `;
 
+const ControlsCell = styled(Cell)`
+    display: 'flex';
+    justify-content: center;
+`;
+
 class List extends Component {
+    static defaultProps = {
+        data: new Array(25).fill({ name: '', ru: '', en: '' }),
+    };
+
     constructor(props) {
         super(props);
         this.state = {
-            data: [],
             total: 0,
             deletingRow: null,
-            showDialog: false,
+            isDialogOpen: false,
             pageSize: 25,
+            deleting: false,
             currentPage: 0,
             computedData: [],
             filterValue: '',
+            editingCell: {
+                row: null,
+                column: null,
+            },
         };
     }
 
     componentDidMount() {
-        const data = Object.entries(rawData).map(([name, { ru, en }]) => ({ name, en, ru }));
-        this.setState({ data }, this.computeData);
+        this.computeData();
+        this.props.setUpdateHandler(this.computeData);
+    }
+
+    getLoadingOptions() {
+        return this.props.loading
+            ? [TableLoadingOption.CELLS, TableLoadingOption.COLUMN_HEADERS]
+            : [];
     }
 
     computeData = () => {
-        const { data, currentPage, filterValue, pageSize } = this.state;
+        const { data } = this.props;
+        const { currentPage, filterValue, pageSize } = this.state;
         const filteredData = getFiltereData(data, filterValue.toLowerCase());
         const current = currentPage * pageSize > filteredData.length ? 0 : currentPage;
         const computedData = getDataSlice(filteredData, current, pageSize);
@@ -65,77 +85,101 @@ class List extends Component {
 
     filterChangeHandler = value => this.setState({ filterValue: value }, this.computeData);
 
-    pageChangeHandler = currentPage => this.setState({ currentPage }, this.computeData);
+    setEditingCell = (row, column) => this.setState({ editingCell: { row, column } });
 
-    cellChangeHandler = (value, key, row) => {
-        const { computedData } = this.state;
-        const newValue = { ...computedData.find(({ name }) => name === row), [key]: value };
-        this.props.changeRow(row, newValue);
+    resetEditingCell = () => this.setState({ editingCell: { row: null, column: null } });
+
+    pageChangeHandler = currentPage =>
+        this.setState({ currentPage }, this.computeData, {
+            onSuccess: () => null,
+            onError: () => null,
+        });
+
+    cellChangeHandler = (value, row, key) => {
+        const oldData = this.state.computedData.find(({ name }) => name === row);
+        if (oldData[key] === value) {
+            return;
+        }
+
+        this.setEditingCell(row, key);
+        const newValue = { ...oldData, [key]: value };
+        this.props.changeRow(row, newValue, {
+            onSuccess: this.resetEditingCell,
+            onError: this.resetEditingCell,
+        });
     };
 
-    cellRenderer = (index, key) => (
-        <EditableCell
-            wrapText
-            rowIndex={key}
-            interactive
-            onConfirm={this.cellChangeHandler}
-            value={this.state.computedData[index][key]}
-            columnIndex={this.state.computedData[index].name}
-        />
-    );
+    cellRenderer = (index, key) => {
+        const { editingCell, computedData } = this.state;
+        const rowIndex = computedData[index].name;
+        const loading = editingCell.row === rowIndex && editingCell.column === key;
 
-    controlsColumnRender = index => {
-        const { deleteRow } = this.props;
         return (
-            <Cell style={{ display: 'flex', justifyContent: 'center' }}>
-                <Button
-                    loading={false}
-                    small
-                    icon="trash"
-                    intent="danger"
-                    onClick={() => this.openDialog(this.state.computedData[index].name)}
-                />
-            </Cell>
+            <EditableCell
+                rowIndex={rowIndex}
+                loading={loading}
+                columnIndex={key}
+                value={computedData[index][key]}
+                onConfirm={this.cellChangeHandler}
+            />
         );
     };
 
-    openDialog = deletingRow => this.setState({ deletingRow, showDialog: true });
+    controlsColumnRender = index => (
+        <ControlsCell>
+            <Button
+                small
+                icon="trash"
+                intent="danger"
+                onClick={() => this.openDialog(this.state.computedData[index].name)}
+            />
+        </ControlsCell>
+    );
 
-    hideDialog = () => this.setState({ deletingRow: null, showDialog: false });
+    openDialog = deletingRow => this.setState({ deletingRow, isDialogOpen: true });
+
+    hideDialog = () => this.setState({ deletingRow: null, isDialogOpen: false, deleting: false });
 
     deleteRow = () => {
-        this.props.deleteRow(this.state.deletingRow);
-        this.hideDialog();
+        const { deletingRow } = this.state;
+        this.setState({ deleting: true });
+        this.props.deleteRow(deletingRow, {
+            onSuccess: this.hideDialog,
+            onError: () => this.setState({ deleting: false }),
+        });
     };
 
     render() {
-        const { computedData, filterValue, currentPage, total, pageSize, showDialog } = this.state;
-        const amount = computedData.length > pageSize ? pageSize : computedData.length;
-        const columnWidth = this.wrapper ? (this.wrapper.clientWidth - 90) / 3 : 0;
+        const {
+            computedData,
+            filterValue,
+            currentPage,
+            total,
+            pageSize,
+            isDialogOpen,
+            deleting,
+        } = this.state;
+
+        const numRows = getNumRows(computedData, pageSize);
+        const columnWidth = getColumnWidth(this.wrapper);
 
         return (
-            <ListWrapper
-                innerRef={wrapper => {
+            <div
+                ref={wrapper => {
                     this.wrapper = wrapper;
                 }}
             >
-                <Dialog title="Confirm deletion" isOpen={showDialog} onClose={this.hideDialog}>
-                    <div className={Classes.DIALOG_BODY}>
-                        Are you sure you want to delete this record?
-                    </div>
-                    <div className={Classes.DIALOG_FOOTER}>
-                        <div className={Classes.DIALOG_FOOTER_ACTIONS}>
-                            <Button onClick={this.hideDialog}>Cancel</Button>
-                            <Button intent="danger" onClick={this.deleteRow}>
-                                Delete
-                            </Button>
-                        </div>
-                    </div>
-                </Dialog>
+                <ConfirmDialog
+                    isOpen={isDialogOpen}
+                    loading={deleting}
+                    hideDialog={this.hideDialog}
+                    deleteHandeler={this.deleteRow}
+                />
                 <Filter value={filterValue} handler={this.filterChangeHandler} />
                 <Table
                     enableRowHeader={false}
-                    numRows={amount}
+                    numRows={numRows}
+                    loadingOptions={this.getLoadingOptions()}
                     columnWidths={[columnWidth, columnWidth, columnWidth, 50]}
                 >
                     <Column name="Name" cellRenderer={index => this.cellRenderer(index, 'name')} />
@@ -151,7 +195,7 @@ class List extends Component {
                         pageSize={pageSize}
                     />
                 </PaginationWrapper>
-            </ListWrapper>
+            </div>
         );
     }
 }

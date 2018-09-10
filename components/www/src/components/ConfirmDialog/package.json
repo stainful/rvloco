@@ -1,0 +1,5 @@
+{
+    "name": "confirm-dialog",
+    "main": "./ConfirmDialog.js",
+    "version": "0.0.1"
+}
