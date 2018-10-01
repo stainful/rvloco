@@ -1,12 +1,24 @@
 import React, { Component } from 'react';
+import { Card, Divider } from '@blueprintjs/core';
 import styled from 'styled-components';
 import List from '../List';
 import NewRecord from '../NewRecord';
+import Settings from '../Settings';
 
 import rawData from '../../data';
 
 const Wrapper = styled.div`
     margin: 20px;
+    display: flex;
+`;
+
+const TableCard = styled(Card)`
+    flex-grow: 1;
+    margin-right: 20px;
+`;
+
+const SettingsCard = styled(Card)`
+    width: 400px;
 `;
 
 class App extends Component {
@@ -52,14 +64,21 @@ class App extends Component {
         const { loading, data } = this.state;
         return (
             <Wrapper>
-                <NewRecord create={this.create} />
-                <List
-                    data={data}
-                    loading={loading}
-                    deleteRow={this.deleteRow}
-                    changeRow={this.changeRow}
-                    setUpdateHandler={this.setUpdateHandler}
-                />
+                <TableCard>
+                    <List
+                        data={data}
+                        loading={loading}
+                        deleteRow={this.deleteRow}
+                        changeRow={this.changeRow}
+                        setUpdateHandler={this.setUpdateHandler}
+                    />
+                </TableCard>
+                <SettingsCard>
+                    <NewRecord create={this.create} />
+                    <Divider />
+                    <Settings />
+                    <Divider />
+                </SettingsCard>
             </Wrapper>
         );
     }

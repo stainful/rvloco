@@ -8,7 +8,6 @@ const StyledInput = styled(InputGroup)`
 
 const Filter = ({ value, handler }) => (
     <StyledInput
-        large
         leftIcon="filter"
         placeholder="Filter"
         value={value}
