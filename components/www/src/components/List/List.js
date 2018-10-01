@@ -1,16 +1,8 @@
-import React, { Component } from 'react';
-import styled from 'styled-components';
-import { Button } from '@blueprintjs/core';
-import { Column, Table, EditableCell, Cell, TableLoadingOption } from '@blueprintjs/table';
+import React, { Component, Fragment } from 'react';
+import Table from '../Table';
 import ConfirmDialog from '../ConfirmDialog';
-import Filter from '../Filter';
-import Pagination from '../Pagination';
 
 const compare = (str, value) => str && str.toLowerCase().includes(value);
-
-const getNumRows = (data, pageSize) => (data.length > pageSize ? pageSize : data.length);
-
-const getColumnWidth = wrapper => (wrapper ? (wrapper.clientWidth - 50) / 3 : 0);
 
 const getFiltereData = (data, value) =>
     value
@@ -28,16 +20,6 @@ const getDataSlice = (data, currentPage, pageSize) => {
     const end = start + pageSize > length ? length : start + pageSize;
     return data.slice(start, end);
 };
-
-const PaginationWrapper = styled.div`
-    display: flex;
-    justify-content: flex-end;
-`;
-
-const ControlsCell = styled(Cell)`
-    display: 'flex';
-    justify-content: center;
-`;
 
 class List extends Component {
     static defaultProps = {
@@ -59,18 +41,17 @@ class List extends Component {
                 row: null,
                 column: null,
             },
+            columns: [
+                { key: 'name', title: 'Name', sorting: true },
+                { key: 'ru', title: 'Ru', sorting: true },
+                { key: 'en', title: 'En', sorting: true },
+            ],
         };
     }
 
     componentDidMount() {
         this.computeData();
         this.props.setUpdateHandler(this.computeData);
-    }
-
-    getLoadingOptions() {
-        return this.props.loading
-            ? [TableLoadingOption.CELLS, TableLoadingOption.COLUMN_HEADERS]
-            : [];
     }
 
     computeData = () => {
@@ -109,33 +90,6 @@ class List extends Component {
         });
     };
 
-    cellRenderer = (index, key) => {
-        const { editingCell, computedData } = this.state;
-        const rowIndex = computedData[index].name;
-        const loading = editingCell.row === rowIndex && editingCell.column === key;
-
-        return (
-            <EditableCell
-                rowIndex={rowIndex}
-                loading={loading}
-                columnIndex={key}
-                value={computedData[index][key]}
-                onConfirm={this.cellChangeHandler}
-            />
-        );
-    };
-
-    controlsColumnRender = index => (
-        <ControlsCell>
-            <Button
-                small
-                icon="trash"
-                intent="danger"
-                onClick={() => this.openDialog(this.state.computedData[index].name)}
-            />
-        </ControlsCell>
-    );
-
     openDialog = deletingRow => this.setState({ deletingRow, isDialogOpen: true });
 
     hideDialog = () => this.setState({ deletingRow: null, isDialogOpen: false, deleting: false });
@@ -158,44 +112,28 @@ class List extends Component {
             pageSize,
             isDialogOpen,
             deleting,
+            columns,
         } = this.state;
 
-        const numRows = getNumRows(computedData, pageSize);
-        const columnWidth = getColumnWidth(this.wrapper);
-
         return (
-            <div
-                ref={wrapper => {
-                    this.wrapper = wrapper;
-                }}
-            >
+            <Fragment>
                 <ConfirmDialog
                     isOpen={isDialogOpen}
                     loading={deleting}
                     hideDialog={this.hideDialog}
                     deleteHandeler={this.deleteRow}
                 />
-                <Filter value={filterValue} handler={this.filterChangeHandler} />
                 <Table
-                    enableRowHeader={false}
-                    numRows={numRows}
-                    loadingOptions={this.getLoadingOptions()}
-                    columnWidths={[columnWidth, columnWidth, columnWidth, 50]}
-                >
-                    <Column name="Name" cellRenderer={index => this.cellRenderer(index, 'name')} />
-                    <Column name="Ru" cellRenderer={index => this.cellRenderer(index, 'ru')} />
-                    <Column name="En" cellRenderer={index => this.cellRenderer(index, 'en')} />
-                    <Column name="" cellRenderer={this.controlsColumnRender} />
-                </Table>
-                <PaginationWrapper>
-                    <Pagination
-                        total={total}
-                        current={currentPage}
-                        handler={this.pageChangeHandler}
-                        pageSize={pageSize}
-                    />
-                </PaginationWrapper>
-            </div>
+                    data={computedData}
+                    columns={columns}
+                    total={total}
+                    filterValue={filterValue}
+                    filterChangeHandler={this.filterChangeHandler}
+                    currentPage={currentPage}
+                    pageChangeHandler={this.pageChangeHandler}
+                    pageSize={pageSize}
+                />
+            </Fragment>
         );
     }
 }
