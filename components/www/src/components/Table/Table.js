@@ -15,6 +15,9 @@ const PaginationWrapper = styled.div`
 
 const StyledTr = styled.tr`
     background: ${({ selected }) => selected ? '#137cbd' : 'transparent'};
+    & td {
+        color: ${({ selected }) => selected ? '#fff' : 'inherit'} !important;
+    }
 `;
 
 const StyledTd = styled.td`
