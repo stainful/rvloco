@@ -17,7 +17,6 @@ class Settings extends Component {
             isDialogOpen: false,
             deleting: false,
             loading: false,
-            initialName: '',
             name: '',
             ru: '',
             en: '',
@@ -32,14 +31,13 @@ class Settings extends Component {
         const { record } = props;
         const { name, ru, en } = record;
 
-        return name !== state.initialName
+        return name !== state.name
             ? {
-                  name,
-                  initialName: name,
-                  ru: ru,
-                  en: en,
-                  loading: false,
-              }
+                name,
+                ru: ru,
+                en: en,
+                loading: false,
+            }
             : state;
     }
 
@@ -61,10 +59,9 @@ class Settings extends Component {
 
     save = () => {
         this.setState({ loading: true });
-        const { initialName, name, ru, en } = this.state;
+        const { name, ru, en } = this.state;
         this.props.save(
-            initialName,
-            { name, ru, en },
+            { key: name, ru, en },
             {
                 onSuccess: () => this.setState({ loading: false }),
                 onError: () => this.setState({ loading: false }),
@@ -72,21 +69,24 @@ class Settings extends Component {
         );
     };
 
-    openDialog = deletingRow => this.setState({ deletingRow, isDialogOpen: true });
+    showDialog = () => this.setState({ isDialogOpen: true });
 
     hideDialog = () => this.setState({ deletingRow: null, isDialogOpen: false, deleting: false });
 
     deleteRow = () => {
-        const { deletingRow } = this.state;
+        const { name } = this.state;
         this.setState({ deleting: true });
-        this.props.deleteRow(deletingRow, {
-            onSuccess: this.hideDialog,
+        this.props.deleteRow({ key: name }, {
+            onSuccess: () => {
+                this.props.changeSelectedRowHandler(null);
+                this.hideDialog();
+            },
             onError: () => this.setState({ deleting: false }),
         });
     };
 
     render() {
-        const { loading, isDialogOpen, deleting, initialName } = this.state;
+        const { loading, isDialogOpen, deleting } = this.state;
         return (
             <Fragment>
                 <ConfirmDialog
@@ -104,7 +104,7 @@ class Settings extends Component {
                         intent="danger"
                         icon="trash"
                         text="Delete"
-                        onClick={() => this.openDialog(initialName)}
+                        onClick={this.showDialog}
                     />
                     <Button loading={loading} icon="floppy-disk" text="Save" onClick={this.save} />
                 </ButtonsWrapper>

@@ -25,8 +25,7 @@ class NewRecord extends Component {
     create = ({ name, ru, en }, resetFields) => {
         this.setState({ loading: true });
         this.props.create(
-            name,
-            { ru, en },
+            { key: name, ru, en },
             {
                 onSuccess: () => {
                     this.hideDialog();

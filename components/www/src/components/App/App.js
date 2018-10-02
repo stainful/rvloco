@@ -1,11 +1,10 @@
 import React, { Component } from 'react';
 import { Card, Divider, Position, Toaster, Intent } from '@blueprintjs/core';
 import styled from 'styled-components';
+import methods from '../../services/api/methods'
 import List from '../List';
 import NewRecord from '../NewRecord';
 import Settings from '../Settings';
-
-import rawData from '../../data';
 
 const Wrapper = styled.div`
     margin: 20px;
@@ -40,40 +39,65 @@ class App extends Component {
         };
     }
     componentDidMount() {
-        this.setState({ loading: true });
-        setTimeout(() => {
-            const data = Object.entries(rawData).map(([name, { ru, en }]) => ({ name, en, ru }));
-            this.setState({ data, loading: false }, this.state.updateHandler);
-        }, 1500);
+        this.getData();
     }
+
+    getData = async () => {
+        this.setState({ loading: true });
+        try {
+            const response = await methods.get('/translations');
+            const data = response.map(record => ({ name: record.keyname, ru: record.ru_translation, en: record.en_translation }))
+            this.setState({ data }, this.state.updateHandler)
+        }
+        catch (err) {
+            this.showErrorNotice(err.message)
+        }
+        finally {
+            this.setState({ loading: false })
+        }
+
+    }
+
+    changeData = async (method, url, message, data, { onSuccess = () => null, onError = () => null }) => {
+        try {
+            const response = await methods[method](url, { data });
+
+            if (response.status !== 200) {
+                const err = new Error(`${response.status} ${response.statusText}`);
+                throw err;
+            }
+            this.showSuccessNotice(message);
+            await this.getData();
+            onSuccess();
+        }
+        catch (err) {
+            this.showErrorNotice(err.message);
+            onError(err.message);
+        }
+    };
+
+    patch = async (...args) => {
+        const message = 'Record was updated';
+        const url = '/translations';
+        await this.changeData('patch', url, message, ...args);
+    };
+
+    create = async (...args) => {
+        const message = 'Record was created';
+        const url = '/translations';
+        await this.changeData('post', url, message, ...args);
+    };
+
+    destroy = async (...args) => {
+        const message = 'Record was deleted';
+        const url = '/translations/delete';
+        await this.changeData('post', url, message, ...args);
+    };
 
     setUpdateHandler = updateHandler => this.setState({ updateHandler });
 
-    changeRow = (name, value, { onSuccess = () => null, onError = () => null }) => {
-        setTimeout(() => {
-            console.log(name, value);
-            onSuccess();
-        }, 1000);
-    };
-
-    deleteRow = (key, { onSuccess = () => null, onError = () => null }) => {
-        setTimeout(() => {
-            console.log('delete', key);
-            this.changeSelectedRow(null);
-            onSuccess();
-        }, 1000);
-    };
-
     changeSelectedRow = selectedRow => {
         this.setState({ selectedRow });
-    };
-
-    create = (key, body, { onSuccess = () => null, onError = () => null }) => {
-        setTimeout(() => {
-            console.log(key, body);
-            onSuccess();
-            this.showSuccessNotice('Record created');
-        }, 1000);
     };
 
     showSuccessNotice = message => {
@@ -92,7 +116,6 @@ class App extends Component {
                     <List
                         data={data}
                         loading={loading}
-                        changeRow={this.changeRow}
                         setUpdateHandler={this.setUpdateHandler}
                         changeSelectedRowHandler={this.changeSelectedRow}
                     />
@@ -103,12 +126,13 @@ class App extends Component {
                     {selectedRow !== null ? (
                         <Settings
                             record={selectedRow}
-                            save={this.changeRow}
-                            deleteRow={this.deleteRow}
+                            save={this.patch}
+                            deleteRow={this.destroy}
+                            changeSelectedRowHandler={this.changeSelectedRow}
                         />
                     ) : (
-                        <Text>...or select an existing record to change it.</Text>
-                    )}
+                            <Text>...or select an existing record to change it.</Text>
+                        )}
                 </SettingsCard>
             </Wrapper>
         );
