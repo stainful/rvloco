@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import methods from '../../services/api/methods'
 import List from '../List';
 import NewRecord from '../NewRecord';
+import ExportButton from '../ExportButton';
 import Settings from '../Settings';
 
 const Wrapper = styled.div`
@@ -21,6 +22,12 @@ const SettingsCard = styled(Card)`
     flex: 0 0 400px;
 `;
 
+const ButtonsWrapper = styled.div`
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+`;
+
 const Text = styled.div`
     padding: 10px 0;
 `;
@@ -34,6 +41,7 @@ class App extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            data: [],
             loading: false,
             selectedRow: null,
             updateHandler: () => null,
@@ -123,7 +131,10 @@ class App extends Component {
                     />
                 </TableCard>
                 <SettingsCard>
-                    <NewRecord create={this.create} />
+                    <ButtonsWrapper>
+                        <ExportButton data={data} disabled={loading} />
+                        <NewRecord create={this.create} />
+                    </ButtonsWrapper>
                     <Divider />
                     {selectedRow !== null ? (
                         <Settings

@@ -1,11 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import { Button } from '@blueprintjs/core';
-import styled from 'styled-components';
 import NewRecordForm from '../NewRecordForm';
-
-const StyledButton = styled(Button)`
-    margin-bottom: 10px;
-`;
 
 class NewRecord extends Component {
     constructor(props) {
@@ -47,7 +42,7 @@ class NewRecord extends Component {
                     submitHandler={this.create}
                 />
 
-                <StyledButton icon="plus" text="Create new record" onClick={this.showDialog} />
+                <Button icon="plus" text="Create new record" onClick={this.showDialog} />
             </Fragment>
         );
     }
