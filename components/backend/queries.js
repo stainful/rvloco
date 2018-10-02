@@ -1,7 +1,7 @@
 module.exports = {
   getAllTranslations: (knex) => knex('translations'),
 
-  upsertTranslation: (knex, data, userId = null) => {
+  upsertTranslation: (patch, knex, data, userId = null) => {
     return knex.transaction(async (trx) => {
       const existing = await trx('translations')
         .first()
@@ -9,6 +9,10 @@ module.exports = {
         .forUpdate();
 
       const res = await (() => {
+        if (existing && !patch) {
+          const err = new Error('"lalala"')
+          throw err;
+        }
         if (existing) {
           return trx('translations')
             .update({
@@ -37,11 +41,12 @@ module.exports = {
             en_translation: data.en,
           },
         });
+
     });
   },
 
   getKeyHistory: (knex, keyname) => knex('changes_history')
-    .select([ 'data', 'ts', 'login' ])
+    .select(['data', 'ts', 'login'])
     .leftJoin('users', 'users.id', 'changes_history.user_id')
     .where({ translation_key: keyname }),
 };

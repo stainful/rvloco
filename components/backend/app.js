@@ -24,10 +24,26 @@ const attachRoutes = (app, { knex }) => {
     '/translations/:key/history',
     async (req, res) => res.json(await QUERIES.getKeyHistory(knex, req.params.key))
   );
+  app.patch(
+    '/translations',
+    async (req, res) => {
+      try {
+        return res.json(await QUERIES.upsertTranslation(true, knex, req.body))
+      } catch (err) {
+        return res.status(400).send(err.message);
+      }
+    }
+  );
   app.post(
     '/translations',
-    async (req, res) => res.json(await QUERIES.upsertTranslation(knex, req.body))
-  )
+    async (req, res) => {
+      try {
+        return res.json(await QUERIES.upsertTranslation(false, knex, req.body))
+      } catch (err) {
+        return res.status(400).send(err.message);
+      }
+    }
+  );
 };
 
 
