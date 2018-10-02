@@ -116,6 +116,7 @@ class App extends Component {
                     <List
                         data={data}
                         loading={loading}
+                        selectedRow={selectedRow}
                         setUpdateHandler={this.setUpdateHandler}
                         changeSelectedRowHandler={this.changeSelectedRow}
                     />

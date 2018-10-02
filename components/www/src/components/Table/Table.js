@@ -13,6 +13,10 @@ const PaginationWrapper = styled.div`
     justify-content: flex-end;
 `;
 
+const StyledTr = styled.tr`
+    background: ${({ selected }) => selected ? '#137cbd' : 'transparent'};
+`;
+
 const StyledTd = styled.td`
     word-break: break-all;
     width: 33.33%;
@@ -33,14 +37,18 @@ const getThead = columns => (
     </thead>
 );
 
-const getTbody = (columns, data, clickHandler, disabled) => (
+const getTbody = (columns, data, clickHandler, disabled, selectedIndex) => (
     <tbody>
         {data.map((row, index) => (
-            <tr key={index} onClick={() => (!disabled ? clickHandler(index) : null)}>
+            <StyledTr
+                selected={index === selectedIndex}
+                key={index}
+                onClick={() => (!disabled ? clickHandler(index) : null)}
+            >
                 {columns.map(({ key }) => (
                     <StyledTd key={key}>{row[key]}</StyledTd>
                 ))}
-            </tr>
+            </StyledTr>
         ))}
     </tbody>
 );
@@ -53,6 +61,7 @@ const Table = ({
     disabled,
     filterValue,
     currentPage,
+    selectedIndex,
     rowClickHandler,
     pageChangeHandler,
     filterChangeHandler,
@@ -62,7 +71,7 @@ const Table = ({
             <Filter value={filterValue} handler={filterChangeHandler} />
             <StyledTable bordered condensed interactive={!disabled} striped>
                 {getThead(columns)}
-                {getTbody(columns, data, rowClickHandler, disabled)}
+                {getTbody(columns, data, rowClickHandler, disabled, selectedIndex)}
             </StyledTable>
             {!data.length ? <NoData>No data</NoData> : null}
             <PaginationWrapper>

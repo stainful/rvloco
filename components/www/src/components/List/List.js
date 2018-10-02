@@ -6,8 +6,8 @@ const compare = (str, value) => str && str.toLowerCase().includes(value);
 const getFiltereData = (data, value) =>
     value
         ? data.filter(
-              ({ name, ru, en }) => compare(name, value) || compare(ru, value) || compare(en, value)
-          )
+            ({ name, ru, en }) => compare(name, value) || compare(ru, value) || compare(en, value)
+        )
         : data;
 
 const getDataSlice = (data, currentPage, pageSize) => {
@@ -71,8 +71,9 @@ class List extends Component {
     };
 
     render() {
-        const { loading } = this.props;
+        const { loading, selectedRow } = this.props;
         const { computedData, filterValue, currentPage, total, pageSize, columns } = this.state;
+        const selectedIndex = selectedRow ? computedData.findIndex(record => record.name === selectedRow.name) : null;
 
         return (
             <Fragment>
@@ -84,6 +85,7 @@ class List extends Component {
                     pageSize={pageSize}
                     currentPage={currentPage}
                     filterValue={filterValue}
+                    selectedIndex={selectedIndex}
                     rowClickHandler={this.rowClickHandler}
                     pageChangeHandler={this.pageChangeHandler}
                     filterChangeHandler={this.filterChangeHandler}
