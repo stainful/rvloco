@@ -33,11 +33,11 @@ class Settings extends Component {
 
         return name !== state.name
             ? {
-                name,
-                ru: ru,
-                en: en,
-                loading: false,
-            }
+                  name,
+                  ru: ru,
+                  en: en,
+                  loading: false,
+              }
             : state;
     }
 
@@ -76,13 +76,16 @@ class Settings extends Component {
     deleteRow = () => {
         const { name } = this.state;
         this.setState({ deleting: true });
-        this.props.deleteRow({ key: name }, {
-            onSuccess: () => {
-                this.props.changeSelectedRowHandler(null);
-                this.hideDialog();
-            },
-            onError: () => this.setState({ deleting: false }),
-        });
+        this.props.deleteRow(
+            { key: name },
+            {
+                onSuccess: () => {
+                    this.props.changeSelectedRowHandler(null);
+                    this.hideDialog();
+                },
+                onError: () => this.setState({ deleting: false }),
+            }
+        );
     };
 
     render() {

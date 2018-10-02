@@ -9,11 +9,7 @@ const StyledInput = styled(InputGroup)`
 const Filter = ({ value, handler }) => {
     const ClearButton = (
         <Tooltip content="Clear">
-            <Button
-                icon="cross"
-                minimal={true}
-                onClick={() => handler('')}
-            />
+            <Button icon="cross" minimal={true} onClick={() => handler('')} />
         </Tooltip>
     );
 
@@ -26,7 +22,7 @@ const Filter = ({ value, handler }) => {
             onChange={({ target }) => handler(target.value)}
         />
     );
-}
+};
 
 Filter.defaultProps = {
     value: '',

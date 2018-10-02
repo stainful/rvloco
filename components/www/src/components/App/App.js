@@ -1,11 +1,12 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { Card, Divider, Position, Toaster, Intent } from '@blueprintjs/core';
 import styled from 'styled-components';
-import methods from '../../services/api/methods'
+import methods from '../../services/api/methods';
 import List from '../List';
 import NewRecord from '../NewRecord';
 import ExportButton from '../ExportButton';
 import Settings from '../Settings';
+import History from '../History';
 
 const Wrapper = styled.div`
     margin: 20px;
@@ -42,6 +43,7 @@ class App extends Component {
         super(props);
         this.state = {
             data: [],
+            history: null,
             loading: false,
             selectedRow: null,
             updateHandler: () => null,
@@ -55,19 +57,42 @@ class App extends Component {
         this.setState({ loading: true });
         try {
             const response = await methods.get('/translations');
-            const data = response.map(record => ({ name: record.keyname, ru: record.ru_translation, en: record.en_translation }))
-            this.setState({ data }, this.state.updateHandler)
-        }
-        catch (err) {
-            this.showErrorNotice(err.message)
-        }
-        finally {
-            this.setState({ loading: false })
-        }
+            const data = response
+                .map(record => ({
+                    name: record.keyname,
+                    ru: record.ru_translation,
+                    en: record.en_translation,
+                }))
+                .sort((a, b) => (a.name > b.name ? 1 : -1));
 
-    }
+            this.setState({ data }, this.state.updateHandler);
+        } catch (err) {
+            this.showErrorNotice(err.message);
+        } finally {
+            this.setState({ loading: false });
+        }
+    };
 
-    changeData = async (method, url, message, data, { onSuccess = () => null, onError = () => null }) => {
+    getHistory = async row => {
+        if (!row) {
+            return this.setState({ history: null });
+        }
+        try {
+            const response = await methods.get(`/translations/${row.name}/history`);
+            this.setState({ history: response });
+        } catch (err) {
+            this.showErrorNotice(err.message);
+            this.setState({ history: null });
+        }
+    };
+
+    changeData = async (
+        method,
+        url,
+        message,
+        data,
+        { onSuccess = () => null, onError = () => null }
+    ) => {
         try {
             const response = await methods[method](url, { data });
 
@@ -78,17 +103,17 @@ class App extends Component {
             this.showSuccessNotice(message);
             await this.getData();
             onSuccess();
-        }
-        catch (err) {
+        } catch (err) {
             this.showErrorNotice(err.message);
             onError(err.message);
         }
     };
 
-    patch = async (...args) => {
+    patch = async (data, options) => {
         const message = 'Record was updated';
         const url = '/translations';
-        await this.changeData('patch', url, message, ...args);
+        await this.changeData('patch', url, message, data, options);
+        this.getHistory({ name: data.key });
     };
 
     create = async (...args) => {
@@ -107,6 +132,7 @@ class App extends Component {
 
     changeSelectedRow = selectedRow => {
         this.setState({ selectedRow });
+        this.getHistory(selectedRow);
     };
 
     showSuccessNotice = message => {
@@ -118,7 +144,7 @@ class App extends Component {
     };
 
     render() {
-        const { loading, data, selectedRow } = this.state;
+        const { loading, data, selectedRow, history } = this.state;
         return (
             <Wrapper>
                 <TableCard>
@@ -144,8 +170,14 @@ class App extends Component {
                             changeSelectedRowHandler={this.changeSelectedRow}
                         />
                     ) : (
-                            <Text>...or select an existing record to change it.</Text>
-                        )}
+                        <Text>...or select an existing record to change it.</Text>
+                    )}
+                    {history !== null ? (
+                        <Fragment>
+                            <Divider />
+                            <History records={history} />
+                        </Fragment>
+                    ) : null}
                 </SettingsCard>
             </Wrapper>
         );

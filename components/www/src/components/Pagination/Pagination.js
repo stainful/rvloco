@@ -8,7 +8,7 @@ class Pagination extends Component {
         const { current, handler } = this.props;
         return (
             <Button
-                disabled={disabled}
+                disabled={disabled || index === current}
                 active={index === current}
                 key={index}
                 onClick={() => handler(index)}
