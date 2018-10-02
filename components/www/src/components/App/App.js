@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Card, Divider } from '@blueprintjs/core';
+import { Card, Divider, Position, Toaster, Intent } from '@blueprintjs/core';
 import styled from 'styled-components';
 import List from '../List';
 import NewRecord from '../NewRecord';
@@ -18,14 +18,24 @@ const TableCard = styled(Card)`
 `;
 
 const SettingsCard = styled(Card)`
-    width: 400px;
+    flex: 0 0 400px;
 `;
+
+const Text = styled.div`
+    padding: 10px 0;
+`;
+
+export const AppToaster = Toaster.create({
+    className: 'recipe-toaster',
+    position: Position.TOP,
+});
 
 class App extends Component {
     constructor(props) {
         super(props);
         this.state = {
             loading: false,
+            selectedRow: null,
             updateHandler: () => null,
         };
     }
@@ -39,45 +49,66 @@ class App extends Component {
 
     setUpdateHandler = updateHandler => this.setState({ updateHandler });
 
-    changeRow = (name, value, { onSuccess, onError }) => {
+    changeRow = (name, value, { onSuccess = () => null, onError = () => null }) => {
         setTimeout(() => {
             console.log(name, value);
             onSuccess();
         }, 1000);
     };
 
-    deleteRow = (key, { onSuccess, onError }) => {
+    deleteRow = (key, { onSuccess = () => null, onError = () => null }) => {
         setTimeout(() => {
             console.log('delete', key);
+            this.changeSelectedRow(null);
             onSuccess();
         }, 1000);
     };
 
-    create = (key, body, { onSuccess, onError }) => {
+    changeSelectedRow = selectedRow => {
+        this.setState({ selectedRow });
+    };
+
+    create = (key, body, { onSuccess = () => null, onError = () => null }) => {
         setTimeout(() => {
             console.log(key, body);
             onSuccess();
+            this.showSuccessNotice('Record created');
         }, 1000);
     };
 
+    showSuccessNotice = message => {
+        AppToaster.show({ message, intent: Intent.SUCCESS, icon: 'tick' });
+    };
+
+    showErrorNotice = message => {
+        AppToaster.show({ message, intent: Intent.DANGER, icon: 'warning-sign' });
+    };
+
     render() {
-        const { loading, data } = this.state;
+        const { loading, data, selectedRow } = this.state;
         return (
             <Wrapper>
                 <TableCard>
                     <List
                         data={data}
                         loading={loading}
-                        deleteRow={this.deleteRow}
                         changeRow={this.changeRow}
                         setUpdateHandler={this.setUpdateHandler}
+                        changeSelectedRowHandler={this.changeSelectedRow}
                     />
                 </TableCard>
                 <SettingsCard>
                     <NewRecord create={this.create} />
                     <Divider />
-                    <Settings />
-                    <Divider />
+                    {selectedRow !== null ? (
+                        <Settings
+                            record={selectedRow}
+                            save={this.changeRow}
+                            deleteRow={this.deleteRow}
+                        />
+                    ) : (
+                        <Text>...or select an existing record to change it.</Text>
+                    )}
                 </SettingsCard>
             </Wrapper>
         );
