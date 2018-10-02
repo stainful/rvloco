@@ -1,0 +1,6 @@
+{
+  "database": {
+    "dbname": "rvloco"
+  },
+  "backendPort": 5000
+}
