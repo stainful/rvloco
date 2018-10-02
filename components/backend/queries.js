@@ -45,6 +45,8 @@ module.exports = {
     });
   },
 
+  deleteTranslation: (knex, data) => knex('translations').where({ keyname: data.key }).del(),
+
   getKeyHistory: (knex, keyname) => knex('changes_history')
     .select(['data', 'ts', 'login'])
     .leftJoin('users', 'users.id', 'changes_history.user_id')

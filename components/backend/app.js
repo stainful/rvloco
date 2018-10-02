@@ -44,6 +44,10 @@ const attachRoutes = (app, { knex }) => {
       }
     }
   );
+  app.post(
+    '/translations/delete',
+    async (req, res) => res.json(await QUERIES.deleteTranslation(knex, req.body))
+  );
 };
 
 
