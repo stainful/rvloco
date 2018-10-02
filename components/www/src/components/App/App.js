@@ -9,6 +9,7 @@ import Settings from '../Settings';
 const Wrapper = styled.div`
     margin: 20px;
     display: flex;
+    min-height: calc(100vh - 40px);
 `;
 
 const TableCard = styled(Card)`
