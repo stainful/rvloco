@@ -1,4 +1,6 @@
-import get from './get.js';
-import post from './post.js';
+import get from './get';
+import patch from './patch';
+import post from './post';
+import destroy from './destroy';
 
-export default { get, post };
+export default { get, patch, post, destroy };
