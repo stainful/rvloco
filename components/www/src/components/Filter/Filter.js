@@ -8,9 +8,8 @@ const StyledInput = styled(InputGroup)`
 
 const Filter = ({ value, handler }) => {
     const ClearButton = (
-        <Tooltip content="Clear" disabled={false}>
+        <Tooltip content="Clear">
             <Button
-                disabled={false}
                 icon="cross"
                 minimal={true}
                 onClick={() => handler('')}
