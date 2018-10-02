@@ -10,7 +10,7 @@ module.exports = {
 
       const res = await (() => {
         if (existing && !patch) {
-          const err = new Error('"lalala"')
+          const err = new Error('Such record already exists')
           throw err;
         }
         if (existing) {
