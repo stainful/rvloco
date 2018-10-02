@@ -1,6 +1,5 @@
 import React, { Component, Fragment } from 'react';
 import Table from '../Table';
-import ConfirmDialog from '../ConfirmDialog';
 
 const compare = (str, value) => str && str.toLowerCase().includes(value);
 
@@ -23,24 +22,18 @@ const getDataSlice = (data, currentPage, pageSize) => {
 
 class List extends Component {
     static defaultProps = {
-        data: new Array(25).fill({ name: '', ru: '', en: '' }),
+        data: new Array(25).fill({ name: ' ', ru: ' ', en: ' ' }),
     };
 
     constructor(props) {
         super(props);
         this.state = {
             total: 0,
-            deletingRow: null,
-            isDialogOpen: false,
             pageSize: 25,
             deleting: false,
             currentPage: 0,
             computedData: [],
             filterValue: '',
-            editingCell: {
-                row: null,
-                column: null,
-            },
             columns: [
                 { key: 'name', title: 'Name', sorting: true },
                 { key: 'ru', title: 'Ru', sorting: true },
@@ -66,72 +59,34 @@ class List extends Component {
 
     filterChangeHandler = value => this.setState({ filterValue: value }, this.computeData);
 
-    setEditingCell = (row, column) => this.setState({ editingCell: { row, column } });
-
-    resetEditingCell = () => this.setState({ editingCell: { row: null, column: null } });
-
     pageChangeHandler = currentPage =>
         this.setState({ currentPage }, this.computeData, {
             onSuccess: () => null,
             onError: () => null,
         });
 
-    cellChangeHandler = (value, row, key) => {
-        const oldData = this.state.computedData.find(({ name }) => name === row);
-        if (oldData[key] === value) {
-            return;
-        }
-
-        this.setEditingCell(row, key);
-        const newValue = { ...oldData, [key]: value };
-        this.props.changeRow(row, newValue, {
-            onSuccess: this.resetEditingCell,
-            onError: this.resetEditingCell,
-        });
-    };
-
-    openDialog = deletingRow => this.setState({ deletingRow, isDialogOpen: true });
-
-    hideDialog = () => this.setState({ deletingRow: null, isDialogOpen: false, deleting: false });
-
-    deleteRow = () => {
-        const { deletingRow } = this.state;
-        this.setState({ deleting: true });
-        this.props.deleteRow(deletingRow, {
-            onSuccess: this.hideDialog,
-            onError: () => this.setState({ deleting: false }),
-        });
+    rowClickHandler = index => {
+        const { changeSelectedRowHandler } = this.props;
+        changeSelectedRowHandler(this.state.computedData[index]);
     };
 
     render() {
-        const {
-            computedData,
-            filterValue,
-            currentPage,
-            total,
-            pageSize,
-            isDialogOpen,
-            deleting,
-            columns,
-        } = this.state;
+        const { loading } = this.props;
+        const { computedData, filterValue, currentPage, total, pageSize, columns } = this.state;
 
         return (
             <Fragment>
-                <ConfirmDialog
-                    isOpen={isDialogOpen}
-                    loading={deleting}
-                    hideDialog={this.hideDialog}
-                    deleteHandeler={this.deleteRow}
-                />
                 <Table
-                    data={computedData}
-                    columns={columns}
                     total={total}
-                    filterValue={filterValue}
-                    filterChangeHandler={this.filterChangeHandler}
-                    currentPage={currentPage}
-                    pageChangeHandler={this.pageChangeHandler}
+                    columns={columns}
+                    disabled={loading}
+                    data={computedData}
                     pageSize={pageSize}
+                    currentPage={currentPage}
+                    filterValue={filterValue}
+                    rowClickHandler={this.rowClickHandler}
+                    pageChangeHandler={this.pageChangeHandler}
+                    filterChangeHandler={this.filterChangeHandler}
                 />
             </Fragment>
         );
