@@ -1,0 +1,8 @@
+const config = {
+    // API server
+    url: 'http://example.com/api',
+    // Default timeout before rejecting http request
+    timeout: 30000,
+};
+
+module.exports = config;
