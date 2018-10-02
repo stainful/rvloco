@@ -45,8 +45,7 @@ class NewRecordForm extends Component {
 
     render() {
         const { visible, loading } = this.props;
-        const { name, ru, en } = this.state;
-        const disabled = !name || !ru || !en;
+        const disabled = !this.state.name;
         return (
             <Dialog title="New record" isOpen={visible} onClose={this.onClose}>
                 <div className={Classes.DIALOG_BODY}>
