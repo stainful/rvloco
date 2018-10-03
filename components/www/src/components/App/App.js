@@ -162,7 +162,10 @@ class App extends Component {
                 <SettingsCard>
                     <ButtonsWrapper>
                         <ExportButton data={data} disabled={loading} />
-                        <NewRecord create={this.create} />
+                        <NewRecord
+                            create={this.create}
+                            changeSelectedRowHandler={this.changeSelectedRow}
+                        />
                     </ButtonsWrapper>
                     <Fragment>
                         <StyledDivider />

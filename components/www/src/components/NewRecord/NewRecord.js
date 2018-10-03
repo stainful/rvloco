@@ -23,6 +23,7 @@ class NewRecord extends Component {
             { key: name, ru, en },
             {
                 onSuccess: () => {
+                    this.props.changeSelectedRowHandler(null);
                     this.hideDialog();
                     resetFields();
                 },
