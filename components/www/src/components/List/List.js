@@ -51,7 +51,7 @@ class List extends Component {
         const { data } = this.props;
         const { currentPage, filterValue, pageSize } = this.state;
         const filteredData = getFiltereData(data, filterValue.toLowerCase());
-        const current = currentPage * pageSize > filteredData.length ? 0 : currentPage;
+        const current = currentPage * pageSize >= filteredData.length ? 0 : currentPage;
         const computedData = getDataSlice(filteredData, current, pageSize);
 
         this.setState({ total: filteredData.length, computedData, currentPage: current });
