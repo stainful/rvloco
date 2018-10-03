@@ -98,7 +98,6 @@ class Settings extends Component {
                     hideDialog={this.hideDialog}
                     deleteHandeler={this.deleteRow}
                 />
-                {this.getFormItem('name', 'Name', 'Please input name')}
                 {this.getFormItem('ru', 'Ru', 'Please input russian text')}
                 {this.getFormItem('en', 'En', 'Please english text')}
                 <ButtonsWrapper>
