@@ -2,10 +2,6 @@ import React, { Fragment } from 'react';
 import { H4 } from '@blueprintjs/core';
 import styled from 'styled-components';
 
-const Header = styled(H4)`
-    padding-top: 10px !important;
-`;
-
 const List = styled.ul`
     padding: 0;
     list-style: none;
@@ -18,7 +14,7 @@ const ListItem = styled.li`
 const History = ({ records }) => {
     return (
         <Fragment>
-            <Header>Change history</Header>
+            <H4>Change history</H4>
             <List>
                 {[...records].reverse().map(({ data, login, ts }) => (
                     <ListItem key={ts}>

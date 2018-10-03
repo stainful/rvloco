@@ -23,14 +23,14 @@ const SettingsCard = styled(Card)`
     flex: 0 0 400px;
 `;
 
+const StyledDivider = styled(Divider)`
+    margin-bottom: 15px !important;
+    margin-top: 20px !important;
+`;
+
 const ButtonsWrapper = styled.div`
     display: flex;
     justify-content: space-between;
-    margin-bottom: 20px;
-`;
-
-const Text = styled.div`
-    padding: 10px 0;
 `;
 
 export const AppToaster = Toaster.create({
@@ -161,7 +161,7 @@ class App extends Component {
                         <ExportButton data={data} disabled={loading} />
                         <NewRecord create={this.create} />
                     </ButtonsWrapper>
-                    <Divider />
+                    <StyledDivider />
                     {selectedRow !== null ? (
                         <Settings
                             record={selectedRow}
@@ -170,11 +170,11 @@ class App extends Component {
                             changeSelectedRowHandler={this.changeSelectedRow}
                         />
                     ) : (
-                        <Text>...or select an existing record to change it.</Text>
+                        <div>...or select an existing record to change it.</div>
                     )}
                     {history !== null ? (
                         <Fragment>
-                            <Divider />
+                            <StyledDivider />
                             <History records={history} />
                         </Fragment>
                     ) : null}
