@@ -3,12 +3,21 @@ import { H4 } from '@blueprintjs/core';
 import styled from 'styled-components';
 
 const List = styled.ul`
+    margin: 0;
     padding: 0;
     list-style: none;
+    overflow-y: scroll;
 `;
 
 const ListItem = styled.li`
     padding-bottom: 10px;
+    &:last-of-type {
+        padding-bottom: 0;
+    }
+`;
+
+const Line = styled.div`
+    word-break: break-all;
 `;
 
 const History = ({ records }) => {
@@ -21,12 +30,12 @@ const History = ({ records }) => {
                         <div>
                             {login} {ts}
                         </div>
-                        <div>
+                        <Line>
                             <b>En:</b> {data.en_translation}
-                        </div>
-                        <div>
+                        </Line>
+                        <Line>
                             <b>Ru:</b> {data.ru_translation}
-                        </div>
+                        </Line>
                     </ListItem>
                 ))}
             </List>

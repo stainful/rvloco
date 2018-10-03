@@ -11,7 +11,7 @@ import History from '../History';
 const Wrapper = styled.div`
     margin: 20px;
     display: flex;
-    min-height: calc(100vh - 40px);
+    height: calc(100vh - 40px);
 `;
 
 const TableCard = styled(Card)`
@@ -21,6 +21,8 @@ const TableCard = styled(Card)`
 
 const SettingsCard = styled(Card)`
     flex: 0 0 400px;
+    display: flex;
+    flex-direction: column;
 `;
 
 const StyledDivider = styled(Divider)`
@@ -29,6 +31,7 @@ const StyledDivider = styled(Divider)`
 `;
 
 const ButtonsWrapper = styled.div`
+    min-height: 30px;
     display: flex;
     justify-content: space-between;
 `;
@@ -161,17 +164,19 @@ class App extends Component {
                         <ExportButton data={data} disabled={loading} />
                         <NewRecord create={this.create} />
                     </ButtonsWrapper>
-                    <StyledDivider />
-                    {selectedRow !== null ? (
-                        <Settings
-                            record={selectedRow}
-                            save={this.patch}
-                            deleteRow={this.destroy}
-                            changeSelectedRowHandler={this.changeSelectedRow}
-                        />
-                    ) : (
-                        <div>...or select an existing record to change it.</div>
-                    )}
+                    <Fragment>
+                        <StyledDivider />
+                        {selectedRow !== null ? (
+                            <Settings
+                                record={selectedRow}
+                                save={this.patch}
+                                deleteRow={this.destroy}
+                                changeSelectedRowHandler={this.changeSelectedRow}
+                            />
+                        ) : (
+                            <div>...or select an existing record to change it.</div>
+                        )}
+                    </Fragment>
                     {history !== null ? (
                         <Fragment>
                             <StyledDivider />

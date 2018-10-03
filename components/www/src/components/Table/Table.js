@@ -1,14 +1,31 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { HTMLTable } from '@blueprintjs/core';
 import Filter from '../Filter';
 import Pagination from '../Pagination';
+
+const Wrapper = styled.div`
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+`;
+
+const ListWrapper = styled.div`
+    height: calc(100% - 30px);
+`;
+
+const TableWrapper = styled.div`
+    height: calc(100% - 50px);
+    overflow-y: scroll;
+`;
 
 const StyledTable = styled(HTMLTable)`
     width: 100%;
 `;
 
 const PaginationWrapper = styled.div`
+    height: 30px;
     display: flex;
     justify-content: flex-end;
 `;
@@ -70,13 +87,20 @@ const Table = ({
     filterChangeHandler,
 }) => {
     return (
-        <Fragment>
-            <Filter value={filterValue} handler={filterChangeHandler} />
-            <StyledTable bordered condensed interactive={!disabled} striped>
-                {getThead(columns)}
-                {getTbody(columns, data, rowClickHandler, disabled, selectedIndex)}
-            </StyledTable>
-            {!data.length ? <NoData>No data</NoData> : null}
+        <Wrapper>
+            <ListWrapper>
+                <Filter value={filterValue} handler={filterChangeHandler} />
+                {data.length ? (
+                    <TableWrapper>
+                        <StyledTable bordered condensed interactive={!disabled} striped>
+                            {getThead(columns)}
+                            {getTbody(columns, data, rowClickHandler, disabled, selectedIndex)}
+                        </StyledTable>
+                    </TableWrapper>
+                ) : (
+                    <NoData>No data</NoData>
+                )}
+            </ListWrapper>
             <PaginationWrapper>
                 <Pagination
                     total={total}
@@ -85,7 +109,7 @@ const Table = ({
                     pageSize={pageSize}
                 />
             </PaginationWrapper>
-        </Fragment>
+        </Wrapper>
     );
 };
 

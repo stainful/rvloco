@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import styled from 'styled-components';
 import { FormGroup, TextArea, Button } from '@blueprintjs/core';
 import ConfirmDialog from '../ConfirmDialog';
@@ -91,7 +91,7 @@ class Settings extends Component {
     render() {
         const { loading, isDialogOpen, deleting } = this.state;
         return (
-            <Fragment>
+            <div>
                 <ConfirmDialog
                     isOpen={isDialogOpen}
                     loading={deleting}
@@ -110,7 +110,7 @@ class Settings extends Component {
                     />
                     <Button loading={loading} icon="floppy-disk" text="Save" onClick={this.save} />
                 </ButtonsWrapper>
-            </Fragment>
+            </div>
         );
     }
 }
